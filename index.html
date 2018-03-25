@@ -157,7 +157,7 @@ var svg = d3.select('body')
 
 var raster = svg.append("g");
 
-var vector = svg.append('g');
+var vector = svg.append("g");
 
 d3.json("precincts.geojson", function(error,data) {
 
@@ -292,8 +292,8 @@ d3.interval(function() {
          .attr('cx', function(d) { return projection(d.geometry.coordinates)[0]; })
          .attr('cy', function(d) { return projection(d.geometry.coordinates)[1]; })
          .attr('r', 5)
-         .style('stroke', 'blue')
-         .style('fill', 'blue');
+         .style('fill', 'green')
+	 .style('stroke', 'green').attr('fill-opacity',1);
 
 
     i++;
