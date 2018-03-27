@@ -747,7 +747,9 @@ var raceLegend = d3.select("#sqf")
                .attr("transform", "translate(" + (margin.left+space) + "," + margin.top + ")")
 			       .attr("id","raceLegend");
 
-var raceColors = ["#1f77b4", "#ff7f0e", "#2ca02c"];
+var raceColors = [{"race":"Black", "color":"#1f77b4"},
+			       {"race":"Hispanic","color":"#ff7f0e"},
+			       {"race":"White","color":"#2ca02c"}];
 
 raceLegend.selectAll("g.rect")
 			       .data(raceColors)
@@ -757,8 +759,18 @@ raceLegend.selectAll("g.rect")
 			       .attr("y", 150)
 			       .attr("height", 20)
 			       .attr("width", 70)
-			       .attr("fill", function(d) { return d })
+			       .attr("fill", function(d) { return d.color })
 			       .attr("stroke", "black");
+
+			       raceLegend.selectAll("text")
+			       .data(raceColors)
+			       .enter()
+			       .append("text")
+			       .attr("x", function(d,i) { return i*70+135; })
+			       .attr("y",140)
+			       .text(function (d) { return d.race; })
+			       .attr("stroke", "black")
+			       .attr("text-anchor", "middle");
 
 //fontawesome button labels
 var labels= [{'name':'All'},
