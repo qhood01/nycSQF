@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
 <html>
 <head>
   <title>NYC SQF</title>
@@ -64,11 +66,11 @@
 var current = null,
     run = false,
     colors = ["#FEE5D9", "#FCAE91", "#FB6A4A", "#DE2D26", "#A50F15"],
-    width = 800,
-    height = 800,
-    bwidth = 600,
-    bheight = 300,
-    margin = {top: 40, right: 20, bottom: 30, left: 20},
+    width = window.innerWidth/2,
+    height = window.innerHeight-20,
+    bwidth = (3/4)*width,
+    bheight = (3/8)*height,
+    margin = {top: 10, right: 10, bottom: 10, left: 10},
     space = 100,
     centered,
     stops_data,
@@ -183,14 +185,23 @@ precincts = vector.selectAll('path')
 		      .scale(1 << minZoom)
 		      .translate(-center[0], -center[1]));
 
-vector.selectAll('rect')
+vector.append('rect')
+ .attr('fill','white')
+ .attr('stroke','black')
+ .attr('x',0)
+ .attr('y',0)
+ .attr('height',60)
+ .attr('width',290)
+ .attr('fill-opacity',1);
+
+vector.selectAll('#legend')
  .data(colors)
  .enter()
  .append('rect')
  .attr('fill', function(d) { return d; })
- .attr('stroke', 'black')
+ .style('stroke', 'black')
  .attr('x', function(d,i){ return (i*50)+20; })
- .attr('y', 0)
+ .attr('y', 20)
  .attr('height', 20)
  .attr('width', 50)
  .transition()
@@ -198,24 +209,28 @@ vector.selectAll('rect')
  .style("fill-opacity", 1);
 
 vector.append('text')
- .attr('x', 125)
- .attr('y', 0)
+ .attr('x', 145)
+ .attr('y', 15)
  .text('Stops per 100,000 population')
  .attr('text-anchor', 'middle')
  .style('fill', 'black')
  .style('fill-opacity', 1);
 
 vector.append('text')
- .attr('x', 25)
- .attr('y', 35)
+ .attr('x', 45)
+ .attr('y', 55)
  .text('Less Stops')
- .attr('text-anchor', 'middle');
+ .attr('text-anchor', 'middle')
+ .style('fill', 'black')
+ .style('fill-opacity', 1);
 
 vector.append('text')
- .attr('x', 4*50+25)
- .attr('y', 35)
+ .attr('x', 4*50+45)
+ .attr('y', 55)
  .text('More Stops')
- .attr('text-anchor', 'middle');
+ .attr('text-anchor', 'middle')
+ .style('fill', 'black')
+ .style('fill-opacity', 1);
 });
 
 function zoomed() {
@@ -241,7 +256,7 @@ precincts.attr("d", path);
 if (transform.k > 2000000) {
 vector.attr('fill','no-fill').attr('fill-opacity', 0);
 } else {
-vector.attr('fill', function(d,i) { return 'red';}).attr('fill-opacity', .5);
+vector.attr('fill', function(d,i) { return 'red';}).attr('fill-opacity', .75);
 }
   var image = raster
       .attr("transform", stringify(tiles.scale, tiles.translate))
@@ -725,6 +740,25 @@ var allButtons= d3.select("#sqf")
                .attr('height', 10)
                .attr("transform", "translate(" + (margin.left+space) + "," + margin.top + ")")
                .attr("id","allButtons");
+
+var raceLegend = d3.select("#sqf")
+               .append('g')
+               .attr('height', 10)
+               .attr("transform", "translate(" + (margin.left+space) + "," + margin.top + ")")
+			       .attr("id","raceLegend");
+
+var raceColors = ["#1f77b4", "#ff7f0e", "#2ca02c"];
+
+raceLegend.selectAll("g.rect")
+			       .data(raceColors)
+			       .enter()
+			       .append("rect")
+			       .attr("x",function(d,i) { return i*70+100; })
+			       .attr("y", 150)
+			       .attr("height", 20)
+			       .attr("width", 70)
+			       .attr("fill", function(d) { return d })
+			       .attr("stroke", "black");
 
 //fontawesome button labels
 var labels= [{'name':'All'},
