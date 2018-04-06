@@ -365,7 +365,7 @@ function handleMouseClick(d) {  // Add interactivity
                 current.attr("fill", function(d) { return d.properties.Color; }).attr("stroke","black").attr("stroke-width",1);
                 d3.selectAll("#bar").transition().duration(1000).style("opacity",0).remove();
               }
-              current = d3.select(this).attr("fill", "grey").attr("stroke","red").attr("stroke-width",3).attr("stroke-opacity",1).attr("fill-rule","zero");
+              current = d3.select(this).attr("fill", "grey").attr("stroke","yellow").attr("stroke-width",3).attr("stroke-opacity",1).attr("fill-rule","zero");
 	      drawBar();
             }
 
