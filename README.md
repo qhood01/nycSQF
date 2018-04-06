@@ -9,7 +9,7 @@ To view the exact coordinates of stops:
   -	Zoom in on the map by double-clicking, or scrolling with a mouse
     -	The color overlaying each precinct will disappear once you have zoomed in enough
   -	Click inside the precinct of interest 
-    -	The precinct that you selected will be outlined in red
+    -	The precinct that you selected will be outlined in yellow
     -	After clicking, a graph displaying the number of stops by year will appear to the right of the map
     -	Hover over each bar to view the number of stops in a given year
   -	Click the bar on the graph corresponding to the year in which you would like to see
