@@ -7,6 +7,7 @@ The following visualization gives you the ability to look at the overall rates o
 On the left hand side, you can look at an overall map of the City, broken out by police precinct, to see how the total number of stops in each precinct compared to one another. The map portion of this visualization gives you the ability to zoom in on any area of the city in order to see the exact location of every stop conducted by the NYPD over the course of a given year.
 
 To view the exact coordinates of stops:
+
 	-Zoom in on the map by double-clicking, or scrolling with a mouse
     	- The color overlaying each precinct will disappear once you have zoomed in enough
     - Click inside the precinct of interest
