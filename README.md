@@ -2,7 +2,7 @@
 
   - Evan Misshula for providing the census estimates needed for the rate calculations
   - Mike Bostock and all of the examples on https://bl.ocks.org/
-  - OpenStreetMap for providing the neccessary maps
+  - OpenStreetMap (https://www.openstreetmap.org) for providing the neccessary maps
 
 # Instructions
 The following visualization gives you the ability to look at the overall rates of stop, question, and frisk actions by the NYPD in New York City from 2003 to 2016.  On the right hand side of the home page, you can select a preferred age range and sex in order to see the rate of stops by race/ethnicity for each year.  Users can hover over any of the black dots on the graph to see the rate for each race/ethnicity for that year.
