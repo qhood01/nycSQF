@@ -3,7 +3,7 @@
 <html>
 <head>
   <title>NYC SQF</title>
-<script src="https://d3js.org/d3.v4.min.js"></script>
+<script type= "text/javascript" src="http://d3js.org/d3.v5.min.js"></script>       
 <script src="https://d3js.org/d3-tile.v0.0.min.js"></script>
 <script src="https://d3js.org/topojson.v1.min.js"></script>
 </head>
@@ -190,6 +190,7 @@ window.onclick = function(event) {
     }
 }
 
+//Defining some global variables, some issues with asynchronous execution 
 var current = null,
     run = false,
     colors = ["#FEE5D9", "#FCAE91", "#FB6A4A", "#DE2D26", "#A50F15"],
@@ -210,6 +211,12 @@ var current = null,
     cols,
     sum,
     names,
+    censusBlack,
+    censusWhite,
+    censuHisp,
+    stopsBlack,
+    stopsWhite,
+    stopsHisp,
     sex = "All",
     minAge = 16,
     maxAge = 64
@@ -224,62 +231,91 @@ var minZoom = 19,
 
 var current = null;
 
-d3.csv("census.black.csv", function(error, data) {
-    if (error) throw error;
+//Loading data into variables
+d3.csv("census.black.csv")
+  .then(function(data) {
     censusBlack = data;
+  })
+  .catch(function(error){
+    throw error;
 });
-d3.csv("census.hisp.csv", function(error, data) {
-    if (error) throw error;
-    censusHisp = data;
+d3.csv("census.hisp.csv")
+  .then(function(data) {
+    censusHisp = data; 
+  })
+  .catch(function(error){
+    throw error;
 });
-d3.csv("census.white.csv", function(error, data) {
-    if (error) throw error;
-    censusWhite = data;
+d3.csv("census.white.csv")
+  .then(function(data) {
+    censusWhite = data; 
+  })
+  .catch(function(error){
+    throw error;
 });
-d3.csv("stops.black.csv", function(error, data) {
-    if (error) throw error;
-    stopsBlack = data;
+d3.csv("stops.black.csv")
+  .then(function(data) {
+    stopsBlack = data; 
+  })
+  .catch(function(error){
+    throw error;
 });
-d3.csv("stops.hisp.csv", function(error, data) {
-    if (error) throw error;
-    stopsHisp = data;
+d3.csv("stops.hisp.csv")
+  .then(function(data) {
+    stopsHisp = data; 
+  })
+  .catch(function(error){
+    throw error;
 });
-d3.csv("stops.white.csv", function(error, data) {
-    if (error) throw error;
+d3.csv("stops.white.csv")
+  .then(function(data) {
     stopsWhite = data;
     modal.style.display = "block"
     homePage();
+  })
+  .catch(function(error){
+    throw error;
 });
 
+//Formatting months for slider
 var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
+//Formatting days for slider and animation
 var monthDays = [0,31,28,31,30,31,30,31,31,30,31,30];
 var sumDays = [];
 monthDays.reduce(function(a,b,i) { return sumDays[i] = a+b; },0);
+
 
 var stringToDate = d3.timeParse("%Y%m%d");
 var dateToString = d3.timeFormat("%Y%m%d");
 var dateRange;
 
+//Defining x and y scales
 var x = d3.scaleBand().rangeRound([0, bwidth-margin.left-margin.right-space]).padding(0.1),
     y = d3.scaleLinear().rangeRound([bheight, 0]);
 
+//Slider scale that appears on top of RHS
 var xslider = d3.scaleLinear()
                 .domain([0, 365])
                 .range([0, room]);
 
+//Formats >3 digit numbers with commas
 format = d3.format(",");
 
+
 var projection = d3.geoMercator()
-    .scale(1 / tau)
+    .scale(1 / tau) //2 * pi
     .translate([0, 0]);
+
 
 var path = d3.geoPath()
     .projection(projection);
 
+//Allows dynamic loading of the geomap so we don't overwhelm the browser
 var tile = d3.tile()
     .size([width, height]);
 
+//Drag and zoom functionality, sets max and min zoom distances
 var zoom = d3.zoom()
     .scaleExtent([1 << minZoom, 1 << maxZoom])
     .on("zoom", zoomed);
@@ -288,6 +324,7 @@ var zoom = d3.zoom()
 var svg = d3.select('body')
           .append('svg')
           .attr('width', width)
+          .attr('id', 'left')
           .attr('height', height)
           .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
           .on("click", homePage);
@@ -296,77 +333,88 @@ var raster = svg.append("g");
 
 var vector = svg.append("g");
 
-d3.json("precincts.geojson", function(error,data) {
 
-precincts = vector.selectAll('path')
-.data(data.features)
-.enter()
-.append('path')
-.attr('fill', function(d,i) { return(colors[blues.indexOf(d.properties.Color)]); })
-.attr('stroke', 'black')
-.on("mouseover", handleMouseOver)
-.on("mouseout", handleMouseOut)
-.on("click", handleMouseClick);
+d3.json("precincts.json")
+  .then(function(data) {
 
-  // Compute the projected initial center.
-  var center = projection([-73.95, 40.70]);
+    data = topojson.feature(data, data.objects.precincts);
 
-  // Apply a zoom transform equivalent to projection.{scale,translate,center}.
-  svg
-      .call(zoom)
-		      .call(zoom.transform, d3.zoomIdentity
-		      .translate(width / 2, height / 2)
-		      .scale(1 << minZoom)
-		      .translate(-center[0], -center[1]));
+    precincts = vector.selectAll('path')
+    .data(data.features)
+    .enter()
+    .append('path')
+    .attr('fill', function(d,i) { return(colors[blues.indexOf(d.properties.Color)]); })
+    .attr('stroke', 'black')
+    .on("mouseover", handleMouseOver)
+    .on("mouseout", handleMouseOut)
+    .on("click", handleMouseClick);
 
-vector.append('rect')
- .attr('fill','white')
- .attr('stroke','black')
- .attr('x',0)
- .attr('y',0)
- .attr('height',60)
- .attr('width',290)
- .attr('fill-opacity',1);
+      // Compute the projected initial center.
+      var center = projection([-73.95, 40.70]);
 
-vector.selectAll('#legend')
- .data(colors)
- .enter()
- .append('rect')
- .attr('fill', function(d) { return d; })
- .style('stroke', 'black')
- .attr('x', function(d,i){ return (i*50)+20; })
- .attr('y', 20)
- .attr('height', 20)
- .attr('width', 50)
- .transition()
- .duration(1000)
- .style("fill-opacity", 1);
+      // Apply a zoom transform equivalent to projection.{scale,translate,center}.
+      svg
+          .call(zoom)
+    		      .call(zoom.transform, d3.zoomIdentity
+    		      .translate(width / 2, height / 2)
+    		      .scale(1 << minZoom)
+    		      .translate(-center[0], -center[1]));
 
-vector.append('text')
- .attr('x', 145)
- .attr('y', 15)
- .text('Total Number of Stops')
- .attr('text-anchor', 'middle')
- .style('fill', 'black')
- .style('fill-opacity', 1);
+    //Legend box		      
+    vector.append('rect')
+     .attr('fill','white')
+     .attr('stroke','black')
+     .attr('x',0)
+     .attr('y',0)
+     .attr('height',60)
+     .attr('width',290)
+     .attr('fill-opacity',1);
 
-vector.append('text')
- .attr('x', 45)
- .attr('y', 55)
- .text('Less Stops')
- .attr('text-anchor', 'middle')
- .style('fill', 'black')
- .style('fill-opacity', 1);
+    //5 color boxes
+    vector.selectAll('#legend')
+     .data(colors)
+     .enter()
+     .append('rect')
+     .attr('fill', function(d) { return d; })
+     .style('stroke', 'black')
+     .attr('x', function(d,i){ return (i*50)+20; })
+     .attr('y', 20)
+     .attr('height', 20)
+     .attr('width', 50)
+     .transition()
+     .duration(1000)
+     .style("fill-opacity", 1);
 
-vector.append('text')
- .attr('x', 4*50+45)
- .attr('y', 55)
- .text('More Stops')
- .attr('text-anchor', 'middle')
- .style('fill', 'black')
- .style('fill-opacity', 1);
+    //Text labels
+    vector.append('text')
+     .attr('x', 145)
+     .attr('y', 15)
+     .text('Total Number of Stops')
+     .attr('text-anchor', 'middle')
+     .style('fill', 'black')
+     .style('fill-opacity', 1);
+
+    vector.append('text')
+     .attr('x', 45)
+     .attr('y', 55)
+     .text('Fewer Stops')
+     .attr('text-anchor', 'middle')
+     .style('fill', 'black')
+     .style('fill-opacity', 1);
+
+    vector.append('text')
+     .attr('x', 4*50+45)
+     .attr('y', 55)
+     .text('More Stops')
+     .attr('text-anchor', 'middle')
+     .style('fill', 'black')
+     .style('fill-opacity', 1);
+  })
+  .catch(function(error){
+    throw error;
 });
 
+//Zoom function
 function zoomed() {
   var transform = d3.event.transform;
   if (!run) {
@@ -376,6 +424,7 @@ function zoomed() {
     on = false;
     i = 0;
   }
+
   var tiles = tile
       .scale(transform.k)
       .translate([transform.x, transform.y])
@@ -385,26 +434,31 @@ function zoomed() {
       .scale(transform.k / tau)
       .translate([transform.x, transform.y]);
 
-precincts.attr("d", path);
 
-if (transform.k > 2000000) {
-vector.attr('fill','no-fill').attr('fill-opacity', 0);
-} else {
-vector.attr('fill-opacity', .75);
-}
-  var image = raster
-      .attr("transform", stringify(tiles.scale, tiles.translate))
-    .selectAll("image")
-    .data(tiles, function(d) { return d; });
+	precincts.attr("d", path);
 
-  image.exit().remove();
+  /* Removing color from precincts when zooming in */
+	if (transform.k > 2000000) {
+	vector.attr('fill','no-fill').attr('fill-opacity', 0);
+	} else {
+	vector.attr('fill-opacity', .75);
+	}
+	  var image = raster
+	      .attr("transform", stringify(tiles.scale, tiles.translate))
+	    .selectAll("image")
+	    .data(tiles, function(d) { return d; });
 
-  image.enter().append("image")
-      .attr("xlink:href", function(d) { return "http://" + "abc"[d[1] % 3] + ".tile.openstreetmap.org/" + d[2] + "/" + d[0] + "/" + d[1] + ".png"; })
-      .attr("x", function(d) { return d[0] * 256; })
-      .attr("y", function(d) { return d[1] * 256; })
-      .attr("width", 256)
-      .attr("height", 256);
+	  image.exit().remove();
+
+	  image.enter().append("image")
+	      .attr("xlink:href", function(d) { 
+          /* ALTERNATE tiling server to consider using, loads just a tiny bit faster */
+          //return "http://a.tile.stamen.com/toner-lite/" + d[2] + "/" + d[0] + "/" + d[1] + ".png"; })
+         return "http://" + "abc"[d[1] % 3] + ".tile.openstreetmap.org/" + d[2] + "/" + d[0] + "/" + d[1] + ".png"; })
+	      .attr("x", function(d) { return d[0] * 256; })
+	      .attr("y", function(d) { return d[1] * 256; })
+	      .attr("width", 256)
+	      .attr("height", 256);
 }
 
 function stringify(scale, translate) {
@@ -462,7 +516,7 @@ function drawStops(precinct,year) {
   }
 
   var pointsPath = "./Data/points."+precinct+"."+year+".geojson";
-  d3.json(pointsPath, function(error,data) {
+  d3.json(pointsPath).then(function(data) {
     stops_data = data;
     run = true;
   });
@@ -570,9 +624,9 @@ function drawBar() {
        .append('g')
        .attr("transform", "translate(" + (margin.left+space) + "," + ((height-bheight)/2) + ")");
 
-
-    d3.csv(name, function(error, data) {
-      if (error) throw error;
+//hmm
+    d3.csv(name) 
+    .then(function(data) {
 
       x.domain(data.map(function(d) { return d.Year; }))
       y.domain([0, d3.max(data, function(d) { return +d.Stops; })])
